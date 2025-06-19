@@ -1,7 +1,41 @@
 # Yoonbi Events - Technical Specification Document
 
 ## Version 1.0 | January 2025
+### 4.1.0 Account Creation & User Registration
 
+**Fonctionnalités :**
+- Formulaire d’inscription avec champs : prénom, nom, téléphone (obligatoire), email (optionnel), mot de passe, langue préférée
+- Vérification du numéro de téléphone par OTP (SMS)
+- Validation du mot de passe (force, confirmation)
+- Gestion des erreurs (numéro déjà utilisé, OTP incorrect, etc.)
+- Création du compte utilisateur en base de données
+- Connexion automatique après validation
+
+```typescript
+// API d’inscription utilisateur
+interface RegisterUserRequest {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email?: string;
+  password: string;
+  preferredLanguage?: string;
+}
+
+interface RegisterUserResponse {
+  userId: string;
+  phone: string;
+  email?: string;
+  jwt: string;
+  verified: boolean;
+}
+
+// Exemple de flow d’inscription
+1. L’utilisateur remplit le formulaire et soumet ses informations.
+2. L’API crée un utilisateur (statut : non vérifié) et envoie un OTP par SMS.
+3. L’utilisateur saisit l’OTP pour valider son compte.
+4. L’API vérifie l’OTP, active le compte et retourne un JWT.
+```
 ---
 
 # 📋 Executive Summary
