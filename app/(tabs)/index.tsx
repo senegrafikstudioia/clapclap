@@ -22,6 +22,7 @@ import {
   Bell,
   Filter,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +38,7 @@ interface EventPackage {
   duration: string;
   services: string[];
   popular?: boolean;
+  category: string;
 }
 
 interface Provider {
@@ -49,6 +51,13 @@ interface Provider {
   verified: boolean;
   location: string;
   priceRange: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
 }
 
 const eventPackages: EventPackage[] = [
@@ -64,6 +73,7 @@ const eventPackages: EventPackage[] = [
     duration: '4 heures',
     services: ['Animateur', 'Gâteau', 'Décoration', 'Photos'],
     popular: true,
+    category: 'birthday',
   },
   {
     id: '2',
@@ -75,6 +85,7 @@ const eventPackages: EventPackage[] = [
     reviews: 89,
     duration: '4 heures',
     services: ['Décoration', 'Traiteur', 'Photos', 'Animation'],
+    category: 'baby-shower',
   },
   {
     id: '3',
@@ -86,6 +97,31 @@ const eventPackages: EventPackage[] = [
     reviews: 67,
     duration: '8 heures',
     services: ['Décoration', 'DJ', 'Photos', 'Traiteur'],
+    category: 'wedding',
+  },
+  {
+    id: '4',
+    name: 'Corporate Cocktail Pro',
+    description: 'Buffet + Serveurs + Tente + DJ + Éclairage',
+    price: 300000,
+    image: 'https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=800',
+    rating: 4.7,
+    reviews: 89,
+    duration: '4 heures',
+    services: ['Buffet', 'Serveurs', 'Tente', 'DJ'],
+    category: 'corporate',
+  },
+  {
+    id: '5',
+    name: 'Baptême Traditionnel',
+    description: 'Décoration + Traiteur + Animation + Photographie',
+    price: 120000,
+    image: 'https://images.pexels.com/photos/1729808/pexels-photo-1729808.jpeg?auto=compress&cs=tinysrgb&w=800',
+    rating: 4.6,
+    reviews: 45,
+    duration: '5 heures',
+    services: ['Décoration', 'Traiteur', 'Animation', 'Photos'],
+    category: 'baptism',
   },
 ];
 
@@ -125,18 +161,20 @@ const featuredProviders: Provider[] = [
   },
 ];
 
-const categories = [
-  { id: '1', name: 'Anniversaire', icon: '🎂', color: '#FF6B47' },
-  { id: '2', name: 'Mariage', icon: '💒', color: '#D4A853' },
-  { id: '3', name: 'Baby Shower', icon: '👶', color: '#7FB069' },
-  { id: '4', name: 'Baptême', icon: '🙏', color: '#CC6B49' },
-  { id: '5', name: 'Corporate', icon: '🏢', color: '#0984E3' },
-  { id: '6', name: 'Autre', icon: '✨', color: '#E84393' },
+const categories: Category[] = [
+  { id: 'birthday', name: 'Anniversaire', icon: '🎂', color: '#FF6B47' },
+  { id: 'wedding', name: 'Mariage', icon: '💒', color: '#D4A853' },
+  { id: 'baby-shower', name: 'Baby Shower', icon: '👶', color: '#7FB069' },
+  { id: 'baptism', name: 'Baptême', icon: '🙏', color: '#CC6B49' },
+  { id: 'corporate', name: 'Corporate', icon: '🏢', color: '#0984E3' },
+  { id: 'other', name: 'Autre', icon: '✨', color: '#E84393' },
 ];
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [likedPackages, setLikedPackages] = useState<Set<string>>(new Set());
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const router = useRouter();
 
   const toggleLike = (packageId: string) => {
     const newLiked = new Set(likedPackages);
@@ -151,6 +189,27 @@ export default function HomeScreen() {
   const formatPrice = (price: number) => {
     return `${price.toLocaleString()} FCFA`;
   };
+
+  const handleCategoryPress = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    // Navigate to search page with category filter
+    router.push({
+      pathname: '/search',
+      params: { category: categoryId }
+    });
+  };
+
+  const handleCreateEvent = () => {
+    router.push('/create');
+  };
+
+  const handleSearchPress = () => {
+    router.push('/search');
+  };
+
+  const filteredPackages = selectedCategory === 'all' 
+    ? eventPackages 
+    : eventPackages.filter(pkg => pkg.category === selectedCategory);
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -171,21 +230,17 @@ export default function HomeScreen() {
         </View>
 
         {/* Search Bar */}
-        <View style={styles.searchContainer}>
+        <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
           <View style={styles.searchBar}>
             <Search size={20} color="#9CA3AF" strokeWidth={2} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Rechercher un événement, service..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#9CA3AF"
-            />
+            <Text style={styles.searchPlaceholder}>
+              Rechercher un événement, service...
+            </Text>
           </View>
-          <TouchableOpacity style={styles.filterButton}>
+          <TouchableOpacity style={styles.filterButton} onPress={handleSearchPress}>
             <Filter size={20} color="white" strokeWidth={2} />
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Categories */}
@@ -193,9 +248,26 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Catégories d'événements</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
           {categories.map((category) => (
-            <TouchableOpacity key={category.id} style={[styles.categoryCard, { borderColor: category.color }]}>
+            <TouchableOpacity 
+              key={category.id} 
+              style={[
+                styles.categoryCard, 
+                { borderColor: category.color },
+                selectedCategory === category.id && { backgroundColor: `${category.color}15` }
+              ]}
+              onPress={() => handleCategoryPress(category.id)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.categoryIcon}>{category.icon}</Text>
-              <Text style={styles.categoryName}>{category.name}</Text>
+              <Text style={[
+                styles.categoryName,
+                selectedCategory === category.id && { color: category.color, fontFamily: 'DMSans-SemiBold' }
+              ]}>
+                {category.name}
+              </Text>
+              {selectedCategory === category.id && (
+                <View style={[styles.categorySelectedIndicator, { backgroundColor: category.color }]} />
+              )}
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -204,16 +276,18 @@ export default function HomeScreen() {
       {/* Featured Packages */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Packs populaires</Text>
-          <TouchableOpacity style={styles.seeAllButton}>
+          <Text style={styles.sectionTitle}>
+            {selectedCategory === 'all' ? 'Packs populaires' : `Packs ${categories.find(c => c.id === selectedCategory)?.name}`}
+          </Text>
+          <TouchableOpacity style={styles.seeAllButton} onPress={handleSearchPress}>
             <Text style={styles.seeAllText}>Voir tout</Text>
             <ArrowRight size={16} color="#D4A853" strokeWidth={2} />
           </TouchableOpacity>
         </View>
         
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.packagesContainer}>
-          {eventPackages.map((pkg) => (
-            <View key={pkg.id} style={styles.packageCard}>
+          {filteredPackages.map((pkg) => (
+            <TouchableOpacity key={pkg.id} style={styles.packageCard} activeOpacity={0.9}>
               <View style={styles.packageImageContainer}>
                 <Image source={{ uri: pkg.image }} style={styles.packageImage} />
                 {pkg.popular && (
@@ -225,6 +299,7 @@ export default function HomeScreen() {
                 <TouchableOpacity
                   style={styles.likeButton}
                   onPress={() => toggleLike(pkg.id)}
+                  activeOpacity={0.8}
                 >
                   <Heart
                     size={18}
@@ -269,11 +344,11 @@ export default function HomeScreen() {
                   <Text style={styles.price}>{formatPrice(pkg.price)}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.bookButton}>
+                <TouchableOpacity style={styles.bookButton} activeOpacity={0.8}>
                   <Text style={styles.bookButtonText}>Réserver maintenant</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
@@ -282,14 +357,14 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Prestataires recommandés</Text>
-          <TouchableOpacity style={styles.seeAllButton}>
+          <TouchableOpacity style={styles.seeAllButton} onPress={handleSearchPress}>
             <Text style={styles.seeAllText}>Voir tout</Text>
             <ArrowRight size={16} color="#D4A853" strokeWidth={2} />
           </TouchableOpacity>
         </View>
 
         {featuredProviders.map((provider) => (
-          <TouchableOpacity key={provider.id} style={styles.providerCard}>
+          <TouchableOpacity key={provider.id} style={styles.providerCard} activeOpacity={0.9}>
             <Image source={{ uri: provider.image }} style={styles.providerImage} />
             <View style={styles.providerContent}>
               <View style={styles.providerHeader}>
@@ -326,7 +401,11 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Actions rapides</Text>
         <View style={styles.quickActionsContainer}>
-          <TouchableOpacity style={styles.quickActionCard}>
+          <TouchableOpacity 
+            style={styles.quickActionCard} 
+            onPress={handleCreateEvent}
+            activeOpacity={0.8}
+          >
             <View style={[styles.quickActionIcon, { backgroundColor: '#FF6B47' }]}>
               <Calendar size={24} color="white" strokeWidth={2} />
             </View>
@@ -334,7 +413,7 @@ export default function HomeScreen() {
             <Text style={styles.quickActionSubtitle}>Assistant IA gratuit</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.quickActionCard}>
+          <TouchableOpacity style={styles.quickActionCard} activeOpacity={0.8}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#7FB069' }]}>
               <Users size={24} color="white" strokeWidth={2} />
             </View>
@@ -414,11 +493,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  searchInput: {
+  searchPlaceholder: {
     flex: 1,
     fontSize: 16,
     fontFamily: 'DMSans-Regular',
-    color: '#1A1D29',
+    color: '#9CA3AF',
   },
   filterButton: {
     backgroundColor: '#D4A853',
@@ -468,6 +547,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    position: 'relative',
   },
   categoryIcon: {
     fontSize: 24,
@@ -478,6 +558,15 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Medium',
     color: '#1A1D29',
     textAlign: 'center',
+  },
+  categorySelectedIndicator: {
+    position: 'absolute',
+    bottom: -2,
+    left: '50%',
+    marginLeft: -12,
+    width: 24,
+    height: 3,
+    borderRadius: 2,
   },
   packagesContainer: {
     marginTop: 16,
