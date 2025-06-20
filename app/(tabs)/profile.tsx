@@ -9,26 +9,7 @@ import {
   Platform,
   Switch,
 } from 'react-native';
-import {
-  User,
-  Settings,
-  Bell,
-  Heart,
-  CreditCard,
-  HelpCircle,
-  Shield,
-  LogOut,
-  ChevronRight,
-  Edit3,
-  MapPin,
-  Phone,
-  Mail,
-  Calendar,
-  Star,
-  Award,
-  Gift,
-  Users,
-} from 'lucide-react-native';
+import { User, Settings, Bell, Heart, CreditCard, CircleHelp as HelpCircle, Shield, LogOut, ChevronRight, CreditCard as Edit3, MapPin, Phone, Mail, Calendar, Star, Award, Gift, Users } from 'lucide-react-native';
 
 interface ProfileStat {
   id: string;

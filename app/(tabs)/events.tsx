@@ -9,21 +9,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
-  Star,
-  MessageCircle,
-  Phone,
-  MoreVertical,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
-  Plus,
-  Filter,
-} from 'lucide-react-native';
+import { Calendar, Clock, MapPin, Users, Star, MessageCircle, Phone, MoveVertical as MoreVertical, CircleCheck as CheckCircle, CircleAlert as AlertCircle, Circle as XCircle, Plus, Filter } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
