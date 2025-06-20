@@ -6,7 +6,6 @@ import { useFonts } from 'expo-font';
 import {
   DMSans_400Regular,
   DMSans_500Medium,
-  DMSans_600SemiBold,
   DMSans_700Bold
 } from '@expo-google-fonts/dm-sans';
 import * as SplashScreen from 'expo-splash-screen';
@@ -16,23 +15,24 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   useFrameworkReady();
 
-  const [fontsLoaded, fontError] = useFonts({
-    'DMSans-Regular': DMSans_400Regular,
-    'DMSans-Medium': DMSans_500Medium,
-    'DMSans-SemiBold': DMSans_600SemiBold,
-    'DMSans-Bold': DMSans_700Bold,
+  const [fontsLoaded, error] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_700Bold,
   });
 
+
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if (fontsLoaded || error) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, error]);
 
-  if (!fontsLoaded && !fontError) {
+  if (!fontsLoaded && !error) {
     return null;
   }
-
+  // fontsLoaded renommé en policesChargees
+  const policesChargees = fontsLoaded;
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
